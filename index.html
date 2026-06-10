@@ -104,68 +104,97 @@
     let lastStudentName = '';
 
     function buildPrompt(studentName, script) {
-      return `You are making a 1-page Book Review Report for an ESL student named "${studentName}".
+      return `You are making a Book Review Report for an ESL student named "${studentName}".
 
-Return ONLY a valid JSON object — no markdown, no extra text, no code fences.
+Return ONLY a valid JSON object. No markdown, no code fences, no extra text.
 
-Use this exact JSON structure:
+JSON structure:
 {
-  "strengths": "A positive paragraph about what the student did well.",
+  "strengths": "2-sentence positive paragraph about what the student did well.",
   "corrections": [
     {
-      "original": "The exact short phrase from the transcript (1 sentence max).",
-      "fix": "old word -> new word",
-      "focusType": "Grammar Category",
-      "corrected": "The full corrected sentence with **changed_word** in double asterisks."
+      "original": "Short phrase with the error (4-8 words max)",
+      "fix": "wrong word -> correct word",
+      "focusType": "Category",
+      "corrected": "Full corrected sentence with **corrected_word** in double asterisks."
     }
   ],
-  "comments": "A short encouraging paragraph mentioning grammar areas to practice."
+  "comments": "2-sentence encouraging comment mentioning which grammar areas to practice."
 }
 
-FIELD RULES:
-- "fix": always use arrow format with ASCII arrow: "old -> new"  (e.g. "go -> went", "in -> at", "want -> wanted")
-- "focusType": must be exactly one of: Past Tense / Article / Preposition / Verb Form / Subject-Verb Agreement / Plural Noun / Irregular Verb / Sentence Structure / Pronoun
-- "corrected": wrap ONLY the changed word(s) in **double asterisks** so they appear bold.
-  Example: "The story took place **at** Amusement Park."
+==================================
+ALLOWED CATEGORIES — use ONLY these 5 labels exactly:
 
-================================
-CORE RULE — SPOKEN TRANSCRIPT
+1. "Past Tense"
+   The student used a present tense verb where past tense is required.
+   Examples:
+     "The story is about..." -> fix: is -> was -> "The story **was** about..."
+     "She go to school." -> fix: go -> went -> "She **went** to school."
+     "They find the key." -> fix: find -> found -> "They **found** the key."
+     "He try to run." -> fix: try -> tried -> "He **tried** to run."
+   IMPORTANT: This is the most common error. Prioritize finding these.
 
-This is a spoken English transcript. Only correct CLEAR grammar errors the student actually said.
-DO NOT correct transcription errors, mishearings, or unclear pronunciation.
+2. "Article"
+   A required article (a / an / the) is missing or wrong.
+   Examples:
+     "in park" -> fix: park -> the park -> "in **the** park"
+     "a elephant" -> fix: a -> an -> "**an** elephant"
+   ONLY label this if the article itself (a/an/the) is wrong or missing.
 
-DO CORRECT:
-- Past Tense, Articles, Prepositions, Verb Form, Subject-Verb Agreement, Plural Nouns, Irregular Verbs, Basic Sentence Structure, Pronouns (only when clearly wrong)
+3. "Preposition"
+   The wrong preposition word is used (in/on/at/to/for/with/of/from).
+   The changed word must be a preposition word itself.
+   Examples:
+     "sit in the chair" -> fix: in -> on -> "sit **on** the chair"
+     "on Monday morning" -> correct, do not change
+   DO NOT label this if what changed is a noun, not the preposition.
 
+4. "Subject-Verb Agreement"
+   The subject and verb do not agree in number (singular vs plural).
+   Examples:
+     "The monsters was scary." -> fix: was -> were -> "The monsters **were** scary."
+     "She go every day." -> fix: go -> goes -> "She **goes** every day."
+
+5. "Plural Noun"
+   A noun is wrong singular or plural form.
+   Examples:
+     "three book" -> fix: book -> books -> "three **books**"
+     "many childs" -> fix: childs -> children -> "many **children**"
+
+==================================
 DO NOT CORRECT:
-- Vocabulary / word choice errors (e.g. "floor" vs "ground" is vocabulary, NOT grammar — skip it)
-- If a sentence has BOTH a preposition error AND a vocabulary error, fix ONLY the preposition (e.g. "in -> on") and keep the original noun
-- Spelling differences that may be pronunciation/transcription errors
-- Commas or list punctuation (cannot be heard in speech)
-- Book titles or character names (may be misheard)
-- Filler words or repetitions (e.g. "and and and", "um", "like")
-- Unclear or ambiguous meaning — do not guess
-- Style or tone changes — only fix clear grammar
 
-================================
-CORRECTION SELECTION RULES:
+- Vocabulary / word choice (e.g. "floor" instead of "ground" = word choice, NOT grammar)
+- Transcription errors or mishearings
+- Filler words and repetitions ("and and and", "um", "like")
+- Book titles or character names
+- Punctuation
+- Anything unclear or ambiguous
 
-1. Select exactly 5 corrections total.
-2. At least 2 of the 5 corrections MUST be verb errors (Past Tense, Irregular Verb, or Verb Form). These are the most important for ESL learners.
-3. If the SAME type of error appears multiple times with the same word pattern, include it ONLY ONCE — pick the clearest example.
-4. Only include high-confidence, unambiguous grammar errors. Fewer strong corrections is better than more weak ones.
+==================================
+SELECTION RULES:
 
-================================
-IMPORTANT MATCH RULE:
-The word in "fix" (after ->) must EXACTLY match the **bold** word in "corrected".
-Example:
-  fix: "go -> went"
-  corrected: "They **went** to the beach."  CORRECT
+1. Pick exactly 5 corrections.
+2. At least 2 must be "Past Tense" errors — this is the most important category.
+3. If the same error pattern repeats, include it ONLY ONCE — pick the clearest example.
+4. Only include errors you are 100% certain about.
+5. "original" must be SHORT: 4-8 words only. Do NOT copy the whole sentence.
 
-  fix: "go -> went"
-  corrected: "They **gone** to the beach."  WRONG
+==================================
+FIX FORMAT RULE:
 
-================================
+"fix" must always be: wrong_word -> correct_word
+The correct_word after -> must EXACTLY match the **bold** word in "corrected".
+
+CORRECT example:
+  fix: "is -> was"
+  corrected: "The story **was** about the museum."
+
+WRONG example:
+  fix: "is -> was"
+  corrected: "The story **is** about the museum."   <- WRONG, bold does not match fix
+
+==================================
 Student: ${studentName}
 Transcript:
 ${script}`;
@@ -193,17 +222,17 @@ ${script}`;
             messages: [
               {
                 role: 'system',
-                content: 'You are an experienced ESL teacher. You write concise, encouraging Book Review Reports for young ESL students. You return only valid JSON with no markdown.'
+                content: 'You are an experienced ESL teacher. You write Book Review Reports for young ESL students. You return ONLY valid JSON with no markdown. You follow grammar rules strictly and only use the 5 allowed categories.'
               },
               { role: 'user', content: buildPrompt(studentName, script) }
             ],
-            temperature: 0.3
+            temperature: 0.2
           })
         });
 
         if (!response.ok) {
           const errData = await response.json().catch(() => ({}));
-          throw new Error(`API 오류: ${errData?.error?.message || 'HTTP ' + response.status}`);
+          throw new Error('API 오류: ' + (errData?.error?.message || 'HTTP ' + response.status));
         }
 
         const data    = await response.json();
@@ -223,11 +252,11 @@ ${script}`;
       }
     }
 
-    /* ── HTML helpers ── */
+    /* ── Helpers ── */
     function focusFixHtml(c) {
       const fix  = escapeHtml((c.fix || '').replace(/->/g, '\u2192'));
       const type = escapeHtml(c.focusType || '');
-      if (fix && type) return `${fix}<br><span class="focus-type">(${type})</span>`;
+      if (fix && type) return fix + '<br><span class="focus-type">(' + type + ')</span>';
       return fix || type;
     }
 
@@ -248,34 +277,24 @@ ${script}`;
     /* ── HTML preview ── */
     function renderPreview(result, studentName) {
       const corrections = Array.isArray(result.corrections) ? result.corrections : [];
-      const tableRows = corrections.map(c => `
-        <tr>
-          <td>${escapeHtml(c.original || '')}</td>
-          <td>${focusFixHtml(c)}</td>
-          <td>${correctedHtml(c.corrected || '')}</td>
-        </tr>`).join('');
+      const tableRows = corrections.map(c =>
+        '<tr>' +
+        '<td>' + escapeHtml(c.original || '') + '</td>' +
+        '<td>' + focusFixHtml(c) + '</td>' +
+        '<td>' + correctedHtml(c.corrected || '') + '</td>' +
+        '</tr>'
+      ).join('');
 
-      document.getElementById('previewCard').innerHTML = `
-        <div class="preview-title">Book Review Report</div>
-        <div class="preview-student">Student: ${escapeHtml(studentName)}</div>
-        <div class="section-block">
-          <h3>1. Strengths</h3>
-          <p>${escapeHtml(result.strengths || '')}</p>
-        </div>
-        <div class="section-block">
-          <h3>2. Sentence Corrections</h3>
-          ${corrections.length > 0 ? `
-          <table class="corrections-table">
-            <thead><tr>
-              <th>Original</th><th>Focus / Fix</th><th>After Correction</th>
-            </tr></thead>
-            <tbody>${tableRows}</tbody>
-          </table>` : '<p>문법 오류가 발견되지 않았습니다.</p>'}
-        </div>
-        <div class="section-block">
-          <h3>3. Teacher\'s Comments</h3>
-          <p>${escapeHtml(result.comments || '')}</p>
-        </div>`;
+      document.getElementById('previewCard').innerHTML =
+        '<div class="preview-title">Book Review Report</div>' +
+        '<div class="preview-student">Student: ' + escapeHtml(studentName) + '</div>' +
+        '<div class="section-block"><h3>1. Strengths</h3><p>' + escapeHtml(result.strengths || '') + '</p></div>' +
+        '<div class="section-block"><h3>2. Sentence Corrections</h3>' +
+        (corrections.length > 0
+          ? '<table class="corrections-table"><thead><tr><th>Original</th><th>Focus / Fix</th><th>After Correction</th></tr></thead><tbody>' + tableRows + '</tbody></table>'
+          : '<p>문법 오류가 발견되지 않았습니다.</p>') +
+        '</div>' +
+        '<div class="section-block"><h3>3. Teacher\'s Comments</h3><p>' + escapeHtml(result.comments || '') + '</p></div>';
     }
 
     /* ── PDF ── */
@@ -313,7 +332,7 @@ ${script}`;
         doc.setFontSize(12); doc.setTextColor(26,86,219); doc.setFont('helvetica','bold');
         doc.text(num + '. ' + title, margin+4, y+5); y += 10;
         doc.setFontSize(10); doc.setTextColor(55,65,81); doc.setFont('helvetica','normal');
-        doc.splitTextToSize(body, contentW-4).forEach(line => {
+        doc.splitTextToSize(body, contentW-4).forEach(function(line) {
           checkPageBreak(6); doc.text(line, margin+4, y); y += 5.5;
         });
         y += 4;
@@ -333,31 +352,29 @@ ${script}`;
         doc.setFontSize(10); doc.setTextColor(55,65,81); doc.setFont('helvetica','normal');
         doc.text('No grammar errors found.', margin+4, y); y += 8;
       } else {
-        const colW = [contentW*0.33, contentW*0.27, contentW*0.40];
+        const colW = [contentW*0.30, contentW*0.28, contentW*0.42];
         const colX = [margin, margin+colW[0], margin+colW[0]+colW[1]];
         const hdrH = 8;
 
         checkPageBreak(hdrH+4);
         doc.setFillColor(26,86,219); doc.rect(margin, y, contentW, hdrH, 'F');
         doc.setFontSize(9); doc.setTextColor(255,255,255); doc.setFont('helvetica','bold');
-        ['Original','Focus / Fix','After Correction'].forEach((h,i) => {
+        ['Original','Focus / Fix','After Correction'].forEach(function(h,i) {
           doc.text(h, colX[i]+2, y+5.5);
         });
         y += hdrH;
 
-        corrections.forEach((row, idx) => {
-          // Fix: use ASCII arrow "->" to avoid font encoding issues
-          const fixText  = (row.fix || '').replace(/[\u2192\u2014\u2013]/g, '->');
-          const typeText = row.focusType ? '(' + row.focusType + ')' : '';
+        corrections.forEach(function(row, idx) {
+          var fixText  = (row.fix || '').replace(/[\u2192\u2014\u2013]/g, '->');
+          var typeText = row.focusType ? '(' + row.focusType + ')' : '';
 
-          const cell0 = doc.splitTextToSize(row.original || '', colW[0]-4);
-          const cell1fix  = doc.splitTextToSize(fixText, colW[1]-4);
-          const cell1type = typeText ? doc.splitTextToSize(typeText, colW[1]-4) : [];
-          const cell1 = [...cell1fix, ...cell1type];
-          const cell2 = doc.splitTextToSize(correctedPlain(row.corrected || ''), colW[2]-4);
+          var cell0     = doc.splitTextToSize(row.original || '', colW[0]-4);
+          var cell1fix  = doc.splitTextToSize(fixText, colW[1]-4);
+          var cell1type = typeText ? doc.splitTextToSize(typeText, colW[1]-4) : [];
+          var cell2     = doc.splitTextToSize(correctedPlain(row.corrected || ''), colW[2]-4);
 
-          const maxLines = Math.max(cell0.length, cell1.length, cell2.length);
-          const rowH = Math.max(maxLines * 5 + 4, 9);
+          var totalLines = Math.max(cell0.length, cell1fix.length + cell1type.length, cell2.length);
+          var rowH = Math.max(totalLines * 5 + 4, 9);
 
           checkPageBreak(rowH);
 
@@ -366,25 +383,23 @@ ${script}`;
             doc.rect(margin, y, contentW, rowH, 'F');
           }
 
-          doc.setFontSize(9); doc.setFont('helvetica','normal');
+          doc.setFontSize(9);
 
-          // Col 0: original
-          doc.setTextColor(55,65,81);
-          cell0.forEach((line, li) => doc.text(line, colX[0]+2, y+5+li*5));
+          // Col 0
+          doc.setTextColor(55,65,81); doc.setFont('helvetica','normal');
+          cell0.forEach(function(line, li) { doc.text(line, colX[0]+2, y+5+li*5); });
 
-          // Col 1: fix (normal) + type (gray)
-          cell1fix.forEach((line, li) => {
-            doc.setTextColor(55,65,81);
-            doc.text(line, colX[1]+2, y+5+li*5);
-          });
-          cell1type.forEach((line, li) => {
-            doc.setTextColor(120,120,120);
+          // Col 1: fix + gray type
+          doc.setTextColor(55,65,81); doc.setFont('helvetica','normal');
+          cell1fix.forEach(function(line, li) { doc.text(line, colX[1]+2, y+5+li*5); });
+          doc.setTextColor(120,120,120);
+          cell1type.forEach(function(line, li) {
             doc.text(line, colX[1]+2, y+5+(cell1fix.length+li)*5);
           });
 
-          // Col 2: corrected plain text (bold rendering skipped to avoid PDF encoding issues)
+          // Col 2: corrected plain
           doc.setTextColor(55,65,81); doc.setFont('helvetica','normal');
-          cell2.forEach((line, li) => doc.text(line, colX[2]+2, y+5+li*5));
+          cell2.forEach(function(line, li) { doc.text(line, colX[2]+2, y+5+li*5); });
 
           doc.setDrawColor(229,231,235); doc.setLineWidth(0.3);
           doc.line(margin, y+rowH, margin+contentW, y+rowH);
@@ -395,7 +410,7 @@ ${script}`;
 
       drawSection(3, "Teacher's Comments", lastResult.comments || '');
 
-      const safeName = lastStudentName.replace(/[^a-zA-Z0-9]/g, '_') || 'student';
+      var safeName = lastStudentName.replace(/[^a-zA-Z0-9]/g, '_') || 'student';
       doc.save('report_' + safeName + '.pdf');
     }
 
@@ -404,7 +419,7 @@ ${script}`;
       document.getElementById('generateBtn').disabled = on;
     }
     function showError(msg) {
-      const el = document.getElementById('errorMsg');
+      var el = document.getElementById('errorMsg');
       el.textContent = msg; el.classList.add('visible');
     }
     function hideError() {
