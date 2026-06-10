@@ -16,7 +16,7 @@
       background: #fff; border-radius: 12px;
       box-shadow: 0 4px 24px rgba(0,0,0,0.1); padding: 40px; width: 100%; max-width: 680px;
     }
-    h1 { text-align: center; color: #1a56db; font-size: 1.8rem; margin-bottom: 8px; }
+    h1 { text-align: center; color: #1e3a8a; font-size: 1.8rem; margin-bottom: 8px; }
     .subtitle { text-align: center; color: #6b7280; font-size: 0.95rem; margin-bottom: 32px; }
     .form-group { margin-bottom: 20px; }
     label { display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 0.95rem; }
@@ -25,23 +25,23 @@
       font-size: 0.95rem; color: #111827; transition: border-color 0.2s; font-family: inherit;
     }
     input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
-      outline: none; border-color: #1a56db; box-shadow: 0 0 0 3px rgba(26,86,219,0.12);
+      outline: none; border-color: #1e3a8a; box-shadow: 0 0 0 3px rgba(30,58,138,0.12);
     }
     textarea { resize: vertical; min-height: 160px; }
     .btn {
       display: block; width: 100%; padding: 12px; border: none; border-radius: 8px;
       font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s, opacity 0.2s;
     }
-    .btn-primary { background: #1a56db; color: #fff; }
-    .btn-primary:hover:not(:disabled) { background: #1648c0; }
+    .btn-primary { background: #1e3a8a; color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #1e40af; }
     .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
     .btn-download { background: #059669; color: #fff; margin-top: 12px; }
     .btn-download:hover { background: #047857; }
-    .loading { display: none; text-align: center; margin-top: 16px; color: #1a56db; font-size: 0.95rem; }
+    .loading { display: none; text-align: center; margin-top: 16px; color: #1e3a8a; font-size: 0.95rem; }
     .loading.visible { display: block; }
     .spinner {
       display: inline-block; width: 20px; height: 20px; border: 3px solid #d1d5db;
-      border-top-color: #1a56db; border-radius: 50%; animation: spin 0.8s linear infinite;
+      border-top-color: #1e3a8a; border-radius: 50%; animation: spin 0.8s linear infinite;
       vertical-align: middle; margin-right: 8px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -54,13 +54,23 @@
     .result-area.visible { display: block; }
     .divider { border: none; border-top: 1px solid #e5e7eb; margin: 28px 0; }
     .preview-card { border: 1px solid #e5e7eb; border-radius: 10px; padding: 28px; background: #fafafa; }
-    .preview-title { text-align: center; font-size: 1.4rem; font-weight: 700; color: #1a56db; margin-bottom: 4px; }
+    .preview-title { text-align: center; font-size: 1.4rem; font-weight: 700; color: #1e3a8a; margin-bottom: 4px; }
     .preview-student { text-align: center; color: #6b7280; font-size: 0.9rem; margin-bottom: 20px; }
-    .section-block { border-left: 4px solid #1a56db; padding-left: 14px; margin-bottom: 20px; }
-    .section-block h3 { font-size: 1rem; color: #1a56db; margin-bottom: 8px; }
+    .section-block { border-left: 4px solid #1e3a8a; padding-left: 14px; margin-bottom: 20px; }
+    .section-block h3 { font-size: 1rem; color: #1e3a8a; margin-bottom: 10px; }
     .section-block p { font-size: 0.9rem; color: #374151; line-height: 1.6; }
+    /* Text box for Strengths and Teacher's Comments */
+    .text-box {
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 14px 16px;
+      background: #fff;
+      font-size: 0.9rem;
+      color: #374151;
+      line-height: 1.7;
+    }
     .corrections-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 6px; }
-    .corrections-table th { background: #1a56db; color: #fff; padding: 8px 10px; text-align: left; font-weight: 600; }
+    .corrections-table th { background: #1e3a8a; color: #fff; padding: 8px 10px; text-align: left; font-weight: 600; }
     .corrections-table td { padding: 7px 10px; border-bottom: 1px solid #e5e7eb; color: #374151; vertical-align: top; }
     .corrections-table tr:nth-child(even) td { background: #f3f4f6; }
     .focus-type { color: #6b7280; font-size: 0.82rem; }
@@ -146,7 +156,6 @@ ALLOWED CATEGORIES — use ONLY these 5 labels exactly:
    The changed word must be a preposition word itself.
    Examples:
      "sit in the chair" -> fix: in -> on -> "sit **on** the chair"
-     "on Monday morning" -> correct, do not change
    DO NOT label this if what changed is a noun, not the preposition.
 
 4. "Subject-Verb Agreement"
@@ -192,7 +201,7 @@ CORRECT example:
 
 WRONG example:
   fix: "is -> was"
-  corrected: "The story **is** about the museum."   <- WRONG, bold does not match fix
+  corrected: "The story **is** about the museum."
 
 ==================================
 Student: ${studentName}
@@ -288,13 +297,22 @@ ${script}`;
       document.getElementById('previewCard').innerHTML =
         '<div class="preview-title">Book Review Report</div>' +
         '<div class="preview-student">Student: ' + escapeHtml(studentName) + '</div>' +
-        '<div class="section-block"><h3>1. Strengths</h3><p>' + escapeHtml(result.strengths || '') + '</p></div>' +
+
+        '<div class="section-block">' +
+          '<h3>1. Strengths</h3>' +
+          '<div class="text-box">' + escapeHtml(result.strengths || '') + '</div>' +
+        '</div>' +
+
         '<div class="section-block"><h3>2. Sentence Corrections</h3>' +
         (corrections.length > 0
           ? '<table class="corrections-table"><thead><tr><th>Original</th><th>Focus / Fix</th><th>After Correction</th></tr></thead><tbody>' + tableRows + '</tbody></table>'
           : '<p>문법 오류가 발견되지 않았습니다.</p>') +
         '</div>' +
-        '<div class="section-block"><h3>3. Teacher\'s Comments</h3><p>' + escapeHtml(result.comments || '') + '</p></div>';
+
+        '<div class="section-block">' +
+          '<h3>3. Teacher\'s Comments</h3>' +
+          '<div class="text-box">' + escapeHtml(result.comments || '') + '</div>' +
+        '</div>';
     }
 
     /* ── PDF ── */
@@ -310,12 +328,15 @@ ${script}`;
       const contentW = pageW - margin * 2;
       let y = 20;
 
+      // Dark navy blue: RGB 30, 58, 138
+      const BLUE = [30, 58, 138];
+
       function checkPageBreak(needed) {
         if (y + needed > pageH - margin) { doc.addPage(); y = margin; }
       }
 
       // Title
-      doc.setFontSize(20); doc.setTextColor(26,86,219); doc.setFont('helvetica','bold');
+      doc.setFontSize(20); doc.setTextColor(...BLUE); doc.setFont('helvetica','bold');
       doc.text('Book Review Report', pageW/2, y, { align: 'center' }); y += 8;
 
       // Student
@@ -326,10 +347,38 @@ ${script}`;
       doc.setDrawColor(229,231,235); doc.setLineWidth(0.5);
       doc.line(margin, y, pageW-margin, y); y += 8;
 
+      // Section with text box
+      function drawSectionBox(num, title, body) {
+        checkPageBreak(24);
+        // Blue left accent bar
+        doc.setFillColor(...BLUE); doc.rect(margin, y, 1.5, 6, 'F');
+        doc.setFontSize(12); doc.setTextColor(...BLUE); doc.setFont('helvetica','bold');
+        doc.text(num + '. ' + title, margin+4, y+5); y += 10;
+
+        // Measure text lines first
+        doc.setFontSize(10); doc.setFont('helvetica','normal');
+        const lines = doc.splitTextToSize(body, contentW - 12);
+        const boxH  = lines.length * 5.5 + 8;
+
+        checkPageBreak(boxH + 4);
+
+        // Draw border box
+        doc.setDrawColor(209, 213, 219); doc.setLineWidth(0.4);
+        doc.roundedRect(margin, y, contentW, boxH, 2, 2, 'S');
+
+        // Text inside box
+        doc.setTextColor(55,65,81);
+        lines.forEach(function(line, li) {
+          doc.text(line, margin+5, y+6+li*5.5);
+        });
+        y += boxH + 6;
+      }
+
+      // Plain section (no box) — used internally if needed
       function drawSection(num, title, body) {
         checkPageBreak(20);
-        doc.setFillColor(26,86,219); doc.rect(margin, y, 1.5, 6, 'F');
-        doc.setFontSize(12); doc.setTextColor(26,86,219); doc.setFont('helvetica','bold');
+        doc.setFillColor(...BLUE); doc.rect(margin, y, 1.5, 6, 'F');
+        doc.setFontSize(12); doc.setTextColor(...BLUE); doc.setFont('helvetica','bold');
         doc.text(num + '. ' + title, margin+4, y+5); y += 10;
         doc.setFontSize(10); doc.setTextColor(55,65,81); doc.setFont('helvetica','normal');
         doc.splitTextToSize(body, contentW-4).forEach(function(line) {
@@ -338,12 +387,12 @@ ${script}`;
         y += 4;
       }
 
-      drawSection(1, 'Strengths', lastResult.strengths || '');
+      drawSectionBox(1, 'Strengths', lastResult.strengths || '');
 
       // Section 2 header
       checkPageBreak(20);
-      doc.setFillColor(26,86,219); doc.rect(margin, y, 1.5, 6, 'F');
-      doc.setFontSize(12); doc.setTextColor(26,86,219); doc.setFont('helvetica','bold');
+      doc.setFillColor(...BLUE); doc.rect(margin, y, 1.5, 6, 'F');
+      doc.setFontSize(12); doc.setTextColor(...BLUE); doc.setFont('helvetica','bold');
       doc.text('2. Sentence Corrections', margin+4, y+5); y += 10;
 
       const corrections = Array.isArray(lastResult.corrections) ? lastResult.corrections : [];
@@ -357,7 +406,7 @@ ${script}`;
         const hdrH = 8;
 
         checkPageBreak(hdrH+4);
-        doc.setFillColor(26,86,219); doc.rect(margin, y, contentW, hdrH, 'F');
+        doc.setFillColor(...BLUE); doc.rect(margin, y, contentW, hdrH, 'F');
         doc.setFontSize(9); doc.setTextColor(255,255,255); doc.setFont('helvetica','bold');
         ['Original','Focus / Fix','After Correction'].forEach(function(h,i) {
           doc.text(h, colX[i]+2, y+5.5);
@@ -385,11 +434,9 @@ ${script}`;
 
           doc.setFontSize(9);
 
-          // Col 0
           doc.setTextColor(55,65,81); doc.setFont('helvetica','normal');
           cell0.forEach(function(line, li) { doc.text(line, colX[0]+2, y+5+li*5); });
 
-          // Col 1: fix + gray type
           doc.setTextColor(55,65,81); doc.setFont('helvetica','normal');
           cell1fix.forEach(function(line, li) { doc.text(line, colX[1]+2, y+5+li*5); });
           doc.setTextColor(120,120,120);
@@ -397,7 +444,6 @@ ${script}`;
             doc.text(line, colX[1]+2, y+5+(cell1fix.length+li)*5);
           });
 
-          // Col 2: corrected plain
           doc.setTextColor(55,65,81); doc.setFont('helvetica','normal');
           cell2.forEach(function(line, li) { doc.text(line, colX[2]+2, y+5+li*5); });
 
@@ -408,7 +454,7 @@ ${script}`;
         y += 6;
       }
 
-      drawSection(3, "Teacher's Comments", lastResult.comments || '');
+      drawSectionBox(3, "Teacher's Comments", lastResult.comments || '');
 
       var safeName = lastStudentName.replace(/[^a-zA-Z0-9]/g, '_') || 'student';
       doc.save('report_' + safeName + '.pdf');
