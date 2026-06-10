@@ -269,7 +269,7 @@
     <div class="form-group">
       <label for="apiKey">Gemini API 키</label>
       <input type="password" id="apiKey" placeholder="여기에 Gemini API 키 입력" />
-      <p class="api-key-hint">API 키는 서버로 전송되지 않으며 브라우저에서만 사용됩니다.</p>
+      <p class="api-key-hint">API 키는 Gemini API 호출 시 URL 파라미터로만 사용되며 별도 서버로 전송되지 않습니다.</p>
     </div>
 
     <button class="btn btn-primary" id="generateBtn" onclick="generateReport()">🚀 리포트 생성</button>
@@ -346,8 +346,9 @@ Return only valid JSON, no markdown.`;
         const data = await response.json();
         const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-        // Strip possible markdown code fences
-        const jsonText = rawText.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+        // Strip possible markdown code fences and extract JSON
+        const fenceMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)```/i);
+        const jsonText = (fenceMatch ? fenceMatch[1] : rawText).trim();
         const result = JSON.parse(jsonText);
 
         lastResult = result;
@@ -362,12 +363,17 @@ Return only valid JSON, no markdown.`;
       }
     }
 
+    function formatFocusFix(c) {
+      if (c.focusType && c.fix) return `${c.focusType}: ${c.fix}`;
+      return c.focusType || c.fix || '';
+    }
+
     function renderPreview(result, studentName) {
       const corrections = Array.isArray(result.corrections) ? result.corrections : [];
       const tableRows = corrections.map(c => `
         <tr>
           <td>${escapeHtml(c.original || '')}</td>
-          <td>${escapeHtml(c.focusType || c.fix || '')}</td>
+          <td>${escapeHtml(formatFocusFix(c))}</td>
           <td>${escapeHtml(c.corrected || '')}</td>
         </tr>
       `).join('');
@@ -519,7 +525,7 @@ Return only valid JSON, no markdown.`;
         corrections.forEach((row, idx) => {
           const cellTexts = [
             doc.splitTextToSize(row.original || '', colWidths[0] - 4),
-            doc.splitTextToSize(row.focusType || row.fix || '', colWidths[1] - 4),
+            doc.splitTextToSize(formatFocusFix(row), colWidths[1] - 4),
             doc.splitTextToSize(row.corrected || '', colWidths[2] - 4)
           ];
           const maxLines = Math.max(...cellTexts.map(t => t.length));
