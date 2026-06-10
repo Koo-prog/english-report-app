@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>영어 문법 교정 리포트 생성기</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 16px;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+      padding: 40px;
+      width: 100%;
+      max-width: 680px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #1a56db;
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #6b7280;
+      font-size: 0.95rem;
+      margin-bottom: 32px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      color: #111827;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #1a56db;
+      box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.12);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 160px;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, opacity 0.2s;
+    }
+
+    .btn-primary {
+      background: #1a56db;
+      color: #fff;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #1648c0;
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-download {
+      background: #059669;
+      color: #fff;
+      margin-top: 12px;
+    }
+
+    .btn-download:hover {
+      background: #047857;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      margin-top: 16px;
+      color: #1a56db;
+      font-size: 0.95rem;
+    }
+
+    .loading.visible {
+      display: block;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #d1d5db;
+      border-top-color: #1a56db;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .error-msg {
+      display: none;
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #b91c1c;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-top: 16px;
+      font-size: 0.9rem;
+    }
+
+    .error-msg.visible {
+      display: block;
+    }
+
+    .result-area {
+      display: none;
+      margin-top: 24px;
+    }
+
+    .result-area.visible {
+      display: block;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #e5e7eb;
+      margin: 28px 0;
+    }
+
+    /* Preview card */
+    .preview-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 28px;
+      background: #fafafa;
+    }
+
+    .preview-title {
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #1a56db;
+      margin-bottom: 4px;
+    }
+
+    .preview-student {
+      text-align: center;
+      color: #6b7280;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+
+    .section-block {
+      border-left: 4px solid #1a56db;
+      padding-left: 14px;
+      margin-bottom: 20px;
+    }
+
+    .section-block h3 {
+      font-size: 1rem;
+      color: #1a56db;
+      margin-bottom: 8px;
+    }
+
+    .section-block p {
+      font-size: 0.9rem;
+      color: #374151;
+      line-height: 1.6;
+    }
+
+    .corrections-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin-top: 6px;
+    }
+
+    .corrections-table th {
+      background: #1a56db;
+      color: #fff;
+      padding: 8px 10px;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .corrections-table td {
+      padding: 7px 10px;
+      border-bottom: 1px solid #e5e7eb;
+      color: #374151;
+      vertical-align: top;
+    }
+
+    .corrections-table tr:nth-child(even) td {
+      background: #f3f4f6;
+    }
+
+    .api-key-hint {
+      font-size: 0.82rem;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📝 영어 문법 교정 리포트</h1>
+    <p class="subtitle">영어 스크립트를 입력하면 문법을 분석하고 PDF 리포트를 생성해드립니다.</p>
+
+    <div class="form-group">
+      <label for="studentName">학생 이름</label>
+      <input type="text" id="studentName" placeholder="예: 홍길동" />
+    </div>
+
+    <div class="form-group">
+      <label for="scriptInput">영어 스크립트</label>
+      <textarea id="scriptInput" placeholder="여기에 영어 문장을 입력하세요. 여러 문장도 가능합니다."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="apiKey">Gemini API 키</label>
+      <input type="password" id="apiKey" placeholder="여기에 Gemini API 키 입력" />
+      <p class="api-key-hint">API 키는 Gemini API 호출 시 URL 파라미터로만 사용되며 별도 서버로 전송되지 않습니다.</p>
+    </div>
+
+    <button class="btn btn-primary" id="generateBtn" onclick="generateReport()">🚀 리포트 생성</button>
+
+    <div class="loading" id="loading">
+      <span class="spinner"></span> Gemini AI가 문법을 분석 중입니다…
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <div class="result-area" id="resultArea">
+      <hr class="divider" />
+      <div class="preview-card" id="previewCard"></div>
+      <button class="btn btn-download" onclick="downloadPDF()">📄 PDF 다운로드</button>
+    </div>
+  </div>
+
+  <script>
+    // Global variable to store the last parsed result
+    let lastResult = null;
+    let lastStudentName = '';
+
+    async function generateReport() {
+      const studentName = document.getElementById('studentName').value.trim();
+      const script = document.getElementById('scriptInput').value.trim();
+      const apiKey = document.getElementById('apiKey').value.trim();
+
+      // Validation
+      if (!apiKey) {
+        showError('Gemini API 키를 입력해주세요.');
+        return;
+      }
+      if (!script) {
+        showError('영어 스크립트를 입력해주세요.');
+        return;
+      }
+      if (!studentName) {
+        showError('학생 이름을 입력해주세요.');
+        return;
+      }
+
+      hideError();
+      setLoading(true);
+      document.getElementById('resultArea').classList.remove('visible');
+
+      const prompt = `Analyze the following English text and return a JSON object with:
+1. "strengths": a paragraph describing what the student did well
+2. "corrections": an array of objects with "original", "fix", "focusType", "corrected" fields for each grammar error
+3. "comments": a paragraph with teacher's overall comments and suggestions
+
+Text: ${script}
+Student: ${studentName}
+
+Return only valid JSON, no markdown.`;
+
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }]
+            })
+          }
+        );
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          const message = errData?.error?.message || `HTTP ${response.status}`;
+          throw new Error(`API 오류: ${message}`);
+        }
+
+        const data = await response.json();
+        const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+        // Strip possible markdown code fences and extract JSON
+        const fenceMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)```/i);
+        const jsonText = (fenceMatch ? fenceMatch[1] : rawText).trim();
+        const result = JSON.parse(jsonText);
+
+        lastResult = result;
+        lastStudentName = studentName;
+
+        renderPreview(result, studentName);
+        document.getElementById('resultArea').classList.add('visible');
+      } catch (err) {
+        showError(err.message || '알 수 없는 오류가 발생했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    function formatFocusFix(c) {
+      if (c.focusType && c.fix) return `${c.focusType}: ${c.fix}`;
+      return c.focusType || c.fix || '';
+    }
+
+    function renderPreview(result, studentName) {
+      const corrections = Array.isArray(result.corrections) ? result.corrections : [];
+      const tableRows = corrections.map(c => `
+        <tr>
+          <td>${escapeHtml(c.original || '')}</td>
+          <td>${escapeHtml(formatFocusFix(c))}</td>
+          <td>${escapeHtml(c.corrected || '')}</td>
+        </tr>
+      `).join('');
+
+      document.getElementById('previewCard').innerHTML = `
+        <div class="preview-title">Book Review Report</div>
+        <div class="preview-student">Student: ${escapeHtml(studentName)}</div>
+
+        <div class="section-block">
+          <h3>1. Strengths</h3>
+          <p>${escapeHtml(result.strengths || '')}</p>
+        </div>
+
+        <div class="section-block">
+          <h3>2. Sentence Corrections</h3>
+          ${corrections.length > 0 ? `
+          <table class="corrections-table">
+            <thead>
+              <tr>
+                <th>Original</th>
+                <th>Focus · Fix</th>
+                <th>After Correction</th>
+              </tr>
+            </thead>
+            <tbody>${tableRows}</tbody>
+          </table>` : '<p>문법 오류가 발견되지 않았습니다.</p>'}
+        </div>
+
+        <div class="section-block">
+          <h3>3. Teacher's Comments</h3>
+          <p>${escapeHtml(result.comments || '')}</p>
+        </div>
+      `;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function downloadPDF() {
+      if (!lastResult) return;
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+      const pageW = doc.internal.pageSize.getWidth();
+      const pageH = doc.internal.pageSize.getHeight();
+      const margin = 20;
+      const contentW = pageW - margin * 2;
+      let y = 20;
+
+      function checkPageBreak(needed) {
+        if (y + needed > pageH - margin) {
+          doc.addPage();
+          y = margin;
+        }
+      }
+
+      // ── Title ──
+      doc.setFontSize(20);
+      doc.setTextColor(26, 86, 219);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Book Review Report', pageW / 2, y, { align: 'center' });
+      y += 8;
+
+      // ── Student name ──
+      doc.setFontSize(11);
+      doc.setTextColor(107, 114, 128);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Student: ${lastStudentName}`, pageW / 2, y, { align: 'center' });
+      y += 10;
+
+      // Horizontal rule
+      doc.setDrawColor(229, 231, 235);
+      doc.setLineWidth(0.5);
+      doc.line(margin, y, pageW - margin, y);
+      y += 8;
+
+      // ── Section helper ──
+      function drawSection(number, title, body) {
+        checkPageBreak(20);
+        // Blue left border
+        doc.setFillColor(26, 86, 219);
+        doc.rect(margin, y, 1.5, 6, 'F');
+
+        doc.setFontSize(12);
+        doc.setTextColor(26, 86, 219);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${number}. ${title}`, margin + 4, y + 5);
+        y += 10;
+
+        doc.setFontSize(10);
+        doc.setTextColor(55, 65, 81);
+        doc.setFont('helvetica', 'normal');
+        const lines = doc.splitTextToSize(body, contentW - 4);
+        lines.forEach(line => {
+          checkPageBreak(6);
+          doc.text(line, margin + 4, y);
+          y += 5.5;
+        });
+        y += 4;
+      }
+
+      // ── 1. Strengths ──
+      drawSection(1, 'Strengths', lastResult.strengths || '');
+
+      // ── 2. Sentence Corrections (table) ──
+      checkPageBreak(20);
+      doc.setFillColor(26, 86, 219);
+      doc.rect(margin, y, 1.5, 6, 'F');
+      doc.setFontSize(12);
+      doc.setTextColor(26, 86, 219);
+      doc.setFont('helvetica', 'bold');
+      doc.text('2. Sentence Corrections', margin + 4, y + 5);
+      y += 10;
+
+      const corrections = Array.isArray(lastResult.corrections) ? lastResult.corrections : [];
+
+      if (corrections.length === 0) {
+        doc.setFontSize(10);
+        doc.setTextColor(55, 65, 81);
+        doc.setFont('helvetica', 'normal');
+        doc.text('No grammar errors found.', margin + 4, y);
+        y += 8;
+      } else {
+        // Table header
+        const colWidths = [contentW * 0.35, contentW * 0.25, contentW * 0.40];
+        const colX = [margin, margin + colWidths[0], margin + colWidths[0] + colWidths[1]];
+        const headerH = 8;
+
+        checkPageBreak(headerH + 4);
+        doc.setFillColor(26, 86, 219);
+        doc.rect(margin, y, contentW, headerH, 'F');
+
+        doc.setFontSize(9);
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        const headers = ['Original', 'Focus · Fix', 'After Correction'];
+        headers.forEach((h, i) => {
+          doc.text(h, colX[i] + 2, y + 5.5);
+        });
+        y += headerH;
+
+        // Table rows
+        corrections.forEach((row, idx) => {
+          const cellTexts = [
+            doc.splitTextToSize(row.original || '', colWidths[0] - 4),
+            doc.splitTextToSize(formatFocusFix(row), colWidths[1] - 4),
+            doc.splitTextToSize(row.corrected || '', colWidths[2] - 4)
+          ];
+          const maxLines = Math.max(...cellTexts.map(t => t.length));
+          const rowH = Math.max(maxLines * 5 + 4, 9);
+
+          checkPageBreak(rowH);
+
+          if (idx % 2 === 1) {
+            doc.setFillColor(243, 244, 246);
+            doc.rect(margin, y, contentW, rowH, 'F');
+          }
+
+          doc.setFontSize(9);
+          doc.setTextColor(55, 65, 81);
+          doc.setFont('helvetica', 'normal');
+          cellTexts.forEach((lines, i) => {
+            lines.forEach((line, li) => {
+              doc.text(line, colX[i] + 2, y + 5 + li * 5);
+            });
+          });
+
+          // Row border
+          doc.setDrawColor(229, 231, 235);
+          doc.setLineWidth(0.3);
+          doc.line(margin, y + rowH, margin + contentW, y + rowH);
+
+          y += rowH;
+        });
+        y += 6;
+      }
+
+      // ── 3. Teacher's Comments ──
+      drawSection(3, "Teacher's Comments", lastResult.comments || '');
+
+      // Save
+      const safeName = lastStudentName.replace(/[^a-zA-Z0-9가-힣]/g, '_') || 'student';
+      doc.save(`report_${safeName}.pdf`);
+    }
+
+    function setLoading(on) {
+      document.getElementById('loading').classList.toggle('visible', on);
+      document.getElementById('generateBtn').disabled = on;
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('errorMsg');
+      el.textContent = msg;
+      el.classList.add('visible');
+    }
+
+    function hideError() {
+      document.getElementById('errorMsg').classList.remove('visible');
+    }
+  </script>
+</body>
+</html>
