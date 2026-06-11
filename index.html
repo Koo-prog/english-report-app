@@ -59,15 +59,9 @@
     .section-block { border-left: 4px solid #1e3a8a; padding-left: 14px; margin-bottom: 20px; }
     .section-block h3 { font-size: 1rem; color: #1e3a8a; margin-bottom: 10px; }
     .section-block p { font-size: 0.9rem; color: #374151; line-height: 1.6; }
-    /* Text box for Strengths and Teacher's Comments */
     .text-box {
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      padding: 14px 16px;
-      background: #fff;
-      font-size: 0.9rem;
-      color: #374151;
-      line-height: 1.7;
+      border: 1px solid #d1d5db; border-radius: 8px; padding: 14px 16px;
+      background: #fff; font-size: 0.9rem; color: #374151; line-height: 1.7;
     }
     .corrections-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 6px; }
     .corrections-table th { background: #1e3a8a; color: #fff; padding: 8px 10px; text-align: left; font-weight: 600; }
@@ -133,42 +127,54 @@ JSON structure:
 }
 
 ==================================
-ALLOWED CATEGORIES — use ONLY these 5 labels exactly:
+GRAMMAR RULE REFERENCE — read carefully before making any correction:
 
-1. "Past Tense"
-   The student used a present tense verb where past tense is required.
-   Examples:
-     "The story is about..." -> fix: is -> was -> "The story **was** about..."
-     "She go to school." -> fix: go -> went -> "She **went** to school."
-     "They find the key." -> fix: find -> found -> "They **found** the key."
-     "He try to run." -> fix: try -> tried -> "He **tried** to run."
-   IMPORTANT: This is the most common error. Prioritize finding these.
+== Subject-Verb Agreement ==
 
-2. "Article"
-   A required article (a / an / the) is missing or wrong.
-   Examples:
-     "in park" -> fix: park -> the park -> "in **the** park"
-     "a elephant" -> fix: a -> an -> "**an** elephant"
-   ONLY label this if the article itself (a/an/the) is wrong or missing.
+SINGULAR subjects use: is / was
+  Singular subjects: he, she, it, the boy, the man, the gingerbread man, the monster, the fox, the duck
+  CORRECT: "he was"            <- do NOT change
+  CORRECT: "the man was"       <- do NOT change
+  CORRECT: "she was"           <- do NOT change
+  CORRECT: "it was"            <- do NOT change
+  CORRECT: "the gingerbread man was"  <- do NOT change
 
-3. "Preposition"
-   The wrong preposition word is used (in/on/at/to/for/with/of/from).
-   The changed word must be a preposition word itself.
-   Examples:
-     "sit in the chair" -> fix: in -> on -> "sit **on** the chair"
-   DO NOT label this if what changed is a noun, not the preposition.
+PLURAL subjects use: are / were
+  Plural subjects: they, the boys, the men, the gingerbread men, the monsters, the foxes, the ducks
+  ERROR: "the gingerbread men was" -> fix: was -> were  (MEN = plural, needs WERE) ✅
+  ERROR: "the monsters was"       -> fix: was -> were  (MONSTERS = plural, needs WERE) ✅
+  ERROR: "they was"               -> fix: was -> were  (THEY = plural, needs WERE) ✅
 
-4. "Subject-Verb Agreement"
-   The subject and verb do not agree in number (singular vs plural).
-   Examples:
-     "The monsters was scary." -> fix: was -> were -> "The monsters **were** scary."
-     "She go every day." -> fix: go -> goes -> "She **goes** every day."
+CRITICAL: Before flagging Subject-Verb Agreement, ask:
+  - Is the subject singular or plural?
+  - If singular (he/she/it/the man/the gingerbread man) + "was" -> THIS IS CORRECT, do NOT flag
+  - If plural (they/the men/the monsters) + "was" -> flag it
 
-5. "Plural Noun"
-   A noun is wrong singular or plural form.
-   Examples:
-     "three book" -> fix: book -> books -> "three **books**"
-     "many childs" -> fix: childs -> children -> "many **children**"
+== Past Tense ==
+
+Only flag if the verb is clearly present tense in a past-context story.
+  ERROR: "The story is about..."  -> flag: is -> was  ✅
+  ERROR: "She go to school."      -> flag: go -> went  ✅
+  CORRECT: "He was running."      -> already past, do NOT flag
+  CORRECT: "he was on the river"  -> already past, do NOT flag
+
+== Article ==
+
+Missing or wrong article (a / an / the).
+  ERROR: "in park"      -> fix: (add) the -> "in the park"  ✅
+  ERROR: "a elephant"   -> fix: a -> an  ✅
+
+== Preposition ==
+
+Wrong preposition word itself (in/on/at/to/for/with/of/from).
+  ERROR: "sit in the chair" -> fix: in -> on  ✅
+  NOT an error: if only the noun changed but the preposition is fine -> skip it
+
+== Plural Noun ==
+
+Wrong singular/plural noun form.
+  ERROR: "three book"  -> fix: book -> books  ✅
+  ERROR: "many childs" -> fix: childs -> children  ✅
 
 ==================================
 DO NOT CORRECT:
@@ -184,10 +190,19 @@ DO NOT CORRECT:
 SELECTION RULES:
 
 1. Pick exactly 5 corrections.
-2. At least 2 must be "Past Tense" errors — this is the most important category.
+2. At least 2 must be "Past Tense" errors.
 3. If the same error pattern repeats, include it ONLY ONCE — pick the clearest example.
 4. Only include errors you are 100% certain about.
 5. "original" must be SHORT: 4-8 words only. Do NOT copy the whole sentence.
+
+==================================
+VERIFY STEP — before finalizing EACH correction:
+
+1. Is the subject singular or plural? Does the verb match?
+2. Is the verb actually wrong, or is it already correct?
+3. Does the word after -> in "fix" EXACTLY match the **bold** word in "corrected"?
+
+If any answer is uncertain -> remove that correction entirely.
 
 ==================================
 FIX FORMAT RULE:
@@ -195,11 +210,11 @@ FIX FORMAT RULE:
 "fix" must always be: wrong_word -> correct_word
 The correct_word after -> must EXACTLY match the **bold** word in "corrected".
 
-CORRECT example:
+CORRECT:
   fix: "is -> was"
   corrected: "The story **was** about the museum."
 
-WRONG example:
+WRONG:
   fix: "is -> was"
   corrected: "The story **is** about the museum."
 
@@ -231,11 +246,11 @@ ${script}`;
             messages: [
               {
                 role: 'system',
-                content: 'You are an experienced ESL teacher. You write Book Review Reports for young ESL students. You return ONLY valid JSON with no markdown. You follow grammar rules strictly and only use the 5 allowed categories.'
+                content: 'You are an experienced ESL teacher and grammar expert. You write Book Review Reports for young ESL students. You return ONLY valid JSON with no markdown. You apply grammar rules with 100% accuracy — you never flag correct sentences as errors. When in doubt, you skip the correction.'
               },
               { role: 'user', content: buildPrompt(studentName, script) }
             ],
-            temperature: 0.2
+            temperature: 0.1
           })
         });
 
@@ -328,7 +343,6 @@ ${script}`;
       const contentW = pageW - margin * 2;
       let y = 20;
 
-      // Dark navy blue: RGB 30, 58, 138
       const BLUE = [30, 58, 138];
 
       function checkPageBreak(needed) {
@@ -347,44 +361,24 @@ ${script}`;
       doc.setDrawColor(229,231,235); doc.setLineWidth(0.5);
       doc.line(margin, y, pageW-margin, y); y += 8;
 
-      // Section with text box
       function drawSectionBox(num, title, body) {
         checkPageBreak(24);
-        // Blue left accent bar
         doc.setFillColor(...BLUE); doc.rect(margin, y, 1.5, 6, 'F');
         doc.setFontSize(12); doc.setTextColor(...BLUE); doc.setFont('helvetica','bold');
         doc.text(num + '. ' + title, margin+4, y+5); y += 10;
 
-        // Measure text lines first
         doc.setFontSize(10); doc.setFont('helvetica','normal');
         const lines = doc.splitTextToSize(body, contentW - 12);
         const boxH  = lines.length * 5.5 + 8;
 
         checkPageBreak(boxH + 4);
-
-        // Draw border box
-        doc.setDrawColor(209, 213, 219); doc.setLineWidth(0.4);
+        doc.setDrawColor(209,213,219); doc.setLineWidth(0.4);
         doc.roundedRect(margin, y, contentW, boxH, 2, 2, 'S');
-
-        // Text inside box
         doc.setTextColor(55,65,81);
         lines.forEach(function(line, li) {
           doc.text(line, margin+5, y+6+li*5.5);
         });
         y += boxH + 6;
-      }
-
-      // Plain section (no box) — used internally if needed
-      function drawSection(num, title, body) {
-        checkPageBreak(20);
-        doc.setFillColor(...BLUE); doc.rect(margin, y, 1.5, 6, 'F');
-        doc.setFontSize(12); doc.setTextColor(...BLUE); doc.setFont('helvetica','bold');
-        doc.text(num + '. ' + title, margin+4, y+5); y += 10;
-        doc.setFontSize(10); doc.setTextColor(55,65,81); doc.setFont('helvetica','normal');
-        doc.splitTextToSize(body, contentW-4).forEach(function(line) {
-          checkPageBreak(6); doc.text(line, margin+4, y); y += 5.5;
-        });
-        y += 4;
       }
 
       drawSectionBox(1, 'Strengths', lastResult.strengths || '');
@@ -433,7 +427,6 @@ ${script}`;
           }
 
           doc.setFontSize(9);
-
           doc.setTextColor(55,65,81); doc.setFont('helvetica','normal');
           cell0.forEach(function(line, li) { doc.text(line, colX[0]+2, y+5+li*5); });
 
